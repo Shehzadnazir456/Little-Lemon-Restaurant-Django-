@@ -417,22 +417,6 @@ All sensitive config lives in `.env` (git-ignored). Copy `.env.example` to get s
 | `EMAIL_BACKEND` | `console` backend | Set to SMTP backend for real emails |
 | `DEFAULT_FROM_EMAIL` | `noreply@littlelemon.com` | Sender address for order confirmations |
 
----
 
-## Email Configuration
-
-By default the project uses Django's console email backend — confirmation emails are printed to the terminal running `runserver`. This is intentional for local development: you can see exactly what the customer would receive without needing an email account.
-
-**To switch to real email (e.g. Gmail SMTP), add these to `.env`:**
-
-```
-EMAIL_BACKEND=django.core.mail.backends.smtp.EmailBackend
-EMAIL_HOST=smtp.gmail.com
-EMAIL_PORT=587
-EMAIL_USE_TLS=True
-EMAIL_HOST_USER=you@gmail.com
-EMAIL_HOST_PASSWORD=your-app-password
-DEFAULT_FROM_EMAIL=you@gmail.com
-```
 
 Customers receive an order confirmation email on checkout containing their order number, itemised summary, total, order type, and a direct link to the live order tracker.
