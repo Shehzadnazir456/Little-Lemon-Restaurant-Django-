@@ -36,7 +36,7 @@ Little Lemon is a Mediterranean restaurant site that covers every layer of a rea
 
 ## Feature Deep-Dive
 
-### 🏠 Home Page
+### Home Page
 
 The home page is built as a proper restaurant landing page, not a placeholder.
 
@@ -47,7 +47,7 @@ The home page is built as a proper restaurant landing page, not a placeholder.
 
 ---
 
-### 🍽️ Menu
+### Menu
 
 The menu page is the commercial heart of the site.
 
@@ -61,7 +61,7 @@ The menu page is the commercial heart of the site.
 
 ---
 
-### 🛒 Session Cart
+### Session Cart
 
 The cart requires no login — it lives entirely in the Django session.
 
@@ -73,7 +73,7 @@ The cart requires no login — it lives entirely in the Django session.
 
 ---
 
-### 📦 Order System
+### Order System
 
 Customers can place orders without creating an account.
 
@@ -90,7 +90,7 @@ Customers can place orders without creating an account.
 
 ---
 
-### ⏱️ Real-Time Order Tracker
+### Real-Time Order Tracker
 
 This is the most technically interesting part of the site.
 
@@ -105,7 +105,7 @@ This is the most technically interesting part of the site.
 
 ---
 
-### 📅 Reservations
+###  Reservations
 
 - Customers fill in name, email, phone, date/time, party size, optional notes, and optionally pre-order a menu item.
 - The `item` field on the `Reservation` model is a nullable **ForeignKey to `MenuItem`** (not a plain text field), so pre-orders are properly linked and queryable.
