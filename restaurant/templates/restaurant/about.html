@@ -1,0 +1,73 @@
+{% extends 'restaurant/base.html' %}
+{% load static %}
+
+{% block title %}About Us{% endblock %}
+{% block meta_description %}Learn the story behind Little Lemon — a family-owned Mediterranean restaurant in Islamabad.{% endblock %}
+
+{% block content %}
+
+<div class="page-hero">
+  <div class="container">
+    <h1>Our Story</h1>
+    <p>Family-owned, community-rooted, flavour-obsessed.</p>
+  </div>
+</div>
+
+<section class="section section--cream" aria-labelledby="our-story">
+  <div class="container">
+    <div class="about-grid">
+      <div class="about-img">
+        <img
+          src="{% static 'images/aboutt.jpg' %}"
+          alt="The Little Lemon dining room, warm and welcoming"
+          loading="lazy"
+        >
+      </div>
+      <div class="about-content">
+        <h2 id="our-story">Where Every Dish Tells a Story</h2>
+        <p>
+          Little Lemon was born from a simple idea: bring the honest, sun-drenched flavours of the
+          Mediterranean to our neighbourhood. Founded in 2018, our restaurant started as a tiny 20-seat
+          café and grew, plate by plate, into the place you know today.
+        </p>
+        <p>
+          We source ingredients from local farms whenever the season allows — because a dish is only as
+          good as what goes into it. Our chefs train in the Mediterranean tradition: slow cooking, bold
+          herbs, and the patience to let good ingredients speak for themselves.
+        </p>
+        <p>
+          Whether you are here for a quiet weekday lunch or a big weekend dinner with family, we hope you
+          leave feeling as though you have been welcomed into our home — because really, you have.
+        </p>
+        <a href="{% url 'reservation' %}" class="btn btn--secondary" style="margin-top: 1rem;">
+          Reserve a Table
+        </a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section section--dark" aria-labelledby="values-title">
+  <div class="container">
+    <h2 class="section-title" id="values-title">Our Values</h2>
+    <div class="features-grid">
+      <article class="feature-card" style="background:rgba(255,255,255,.08); color: var(--color-white);">
+        <div class="feature-card__icon" aria-hidden="true">🌱</div>
+        <h3 class="feature-card__title" style="color:var(--color-primary);">Seasonal & Local</h3>
+        <p class="feature-card__text" style="color:rgba(255,255,255,.75);">We adapt our menu to the seasons and prioritise local suppliers over imported ingredients wherever possible.</p>
+      </article>
+      <article class="feature-card" style="background:rgba(255,255,255,.08); color: var(--color-white);">
+        <div class="feature-card__icon" aria-hidden="true">♻️</div>
+        <h3 class="feature-card__title" style="color:var(--color-primary);">Zero Waste Kitchen</h3>
+        <p class="feature-card__text" style="color:rgba(255,255,255,.75);">Vegetable offcuts become stocks, day-old bread becomes bruschetta. We take sustainability seriously.</p>
+      </article>
+      <article class="feature-card" style="background:rgba(255,255,255,.08); color: var(--color-white);">
+        <div class="feature-card__icon" aria-hidden="true">❤️</div>
+        <h3 class="feature-card__title" style="color:var(--color-primary);">Community First</h3>
+        <p class="feature-card__text" style="color:rgba(255,255,255,.75);">We support local food banks, host monthly community dinners, and give back to the neighbourhood that made us.</p>
+      </article>
+    </div>
+  </div>
+</section>
+
+{% endblock %}

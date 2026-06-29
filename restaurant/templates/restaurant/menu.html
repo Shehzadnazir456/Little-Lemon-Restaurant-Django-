@@ -1,0 +1,71 @@
+{% extends 'restaurant/base.html' %}
+{% load static %}
+
+{% block title %}Menu{% endblock %}
+{% block meta_description %}Browse Little Lemon's full Mediterranean menu — starters, mains, desserts and drinks.{% endblock %}
+
+{% block content %}
+
+<!-- Page hero -->
+<div class="page-hero">
+  <div class="container">
+    <h1>Our Menu</h1>
+    <p>Fresh, seasonal, and made from scratch every day.</p>
+  </div>
+</div>
+
+<section class="section section--cream" aria-labelledby="menu-heading">
+  <div class="container">
+    <h2 class="sr-only" id="menu-heading">Menu items</h2>
+
+    <!-- Category filter -->
+    <nav class="menu-filter" aria-label="Filter menu by category">
+      <a
+        href="{% url 'menu' %}"
+        class="menu-filter__btn {% if not active_category %}menu-filter__btn--active{% endif %}"
+        aria-current="{% if not active_category %}true{% endif %}"
+      >All</a>
+      {% for cat in categories %}
+      <a
+        href="{% url 'menu' %}?category={{ cat.slug }}"
+        class="menu-filter__btn {% if active_category == cat.slug %}menu-filter__btn--active{% endif %}"
+        aria-current="{% if active_category == cat.slug %}true{% endif %}"
+      >{{ cat.name }}</a>
+      {% endfor %}
+    </nav>
+
+    {% if active_category %}
+      <!-- Flat grid for filtered view -->
+      <div class="menu-grid">
+        {% for item in menu_items %}
+          {% include 'restaurant/_menu_card.html' %}
+        {% empty %}
+          <p>No items in this category yet.</p>
+        {% endfor %}
+      </div>
+
+    {% else %}
+      <!-- Group by category -->
+      {% for cat in categories %}
+        {% with cat_items=cat.items.all %}
+        {% if cat_items %}
+        <section aria-labelledby="cat-{{ cat.slug }}" style="margin-bottom: 3rem;">
+          <h2
+            id="cat-{{ cat.slug }}"
+            style="font-size:1.6rem; color:var(--color-secondary); margin-bottom:1.5rem; padding-bottom:0.5rem; border-bottom: 3px solid var(--color-primary);"
+          >{{ cat.name }}</h2>
+          <div class="menu-grid">
+            {% for item in cat_items %}
+              {% include 'restaurant/_menu_card.html' %}
+            {% endfor %}
+          </div>
+        </section>
+        {% endif %}
+        {% endwith %}
+      {% endfor %}
+    {% endif %}
+
+  </div>
+</section>
+
+{% endblock %}

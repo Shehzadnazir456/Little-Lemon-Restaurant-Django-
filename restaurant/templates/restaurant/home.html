@@ -1,0 +1,141 @@
+{% extends 'restaurant/base.html' %}
+{% load static %}
+
+{% block title %}Home{% endblock %}
+{% block meta_description %}Little Lemon Restaurant — fresh Mediterranean cuisine in Islamabad. Book a table or order online.{% endblock %}
+
+{% block content %}
+
+<!-- ===== Hero ============================================================ -->
+<section class="hero" aria-label="Welcome to Little Lemon">
+  <img
+    class="hero__bg"
+    src="{% static 'images/restaurantt.jpg' %}"
+    alt=""
+    aria-hidden="true"
+  >
+  <div class="hero__overlay" aria-hidden="true"></div>
+  <div class="container">
+    <div class="hero__content">
+      {% if is_open %}
+        <span class="status-pill status-pill--open" role="status">
+          <span class="status-pill__dot" aria-hidden="true"></span>
+          Open Now
+        </span>
+      {% else %}
+        <span class="status-pill status-pill--closed" role="status">
+          <span class="status-pill__dot" aria-hidden="true"></span>
+          Currently Closed
+        </span>
+      {% endif %}
+
+      <p class="hero__eyebrow">Mediterranean Cuisine</p>
+      <h1 class="hero__title">Little Lemon</h1>
+      <p class="hero__subtitle">
+        We are a family-owned restaurant, focused on traditional recipes served with a modern twist.
+        Fresh ingredients, bold flavours, warm hospitality.
+      </p>
+      <div class="hero__actions">
+        <a href="{% url 'reservation' %}" class="btn btn--primary">Book a Table</a>
+        <a href="{% url 'menu' %}"        class="btn btn--outline-light">Explore Menu</a>
+      </div>
+    </div>
+  </div>
+</section>
+<!-- /Hero ================================================================= -->
+
+<!-- ===== Why Little Lemon ================================================ -->
+<section class="section section--cream" aria-labelledby="why-title">
+  <div class="container">
+    <h2 class="section-title" id="why-title">Why Little Lemon?</h2>
+    <p class="section-subtitle">What makes us different from every other restaurant on the block.</p>
+
+    <div class="features-grid">
+      <article class="feature-card">
+        <div class="feature-card__icon" aria-hidden="true">🌿</div>
+        <h3 class="feature-card__title">Fresh Every Day</h3>
+        <p class="feature-card__text">We source ingredients daily from local farms and trusted suppliers — nothing arrives frozen or pre-made.</p>
+      </article>
+      <article class="feature-card">
+        <div class="feature-card__icon" aria-hidden="true">👨‍🍳</div>
+        <h3 class="feature-card__title">Master Chefs</h3>
+        <p class="feature-card__text">Our kitchen team trained across the Mediterranean — Athens, Istanbul, Beirut, Marrakech — so the flavours are authentic.</p>
+      </article>
+      <article class="feature-card">
+        <div class="feature-card__icon" aria-hidden="true">🍋</div>
+        <h3 class="feature-card__title">House-Made Everything</h3>
+        <p class="feature-card__text">From bread to baklava, hummus to our signature lemonade — if we can make it ourselves, we do.</p>
+      </article>
+      <article class="feature-card">
+        <div class="feature-card__icon" aria-hidden="true">🤝</div>
+        <h3 class="feature-card__title">Family Atmosphere</h3>
+        <p class="feature-card__text">Every guest is treated like family. Warm service, unhurried meals, and a space where you can truly relax.</p>
+      </article>
+    </div>
+  </div>
+</section>
+<!-- /Why Little Lemon ===================================================== -->
+
+<!-- ===== Featured Dishes ================================================= -->
+{% if featured_items %}
+<section class="section" aria-labelledby="featured-title">
+  <div class="container">
+    <h2 class="section-title" id="featured-title">Chef's Favourites</h2>
+    <p class="section-subtitle">A few dishes our guests come back for, again and again.</p>
+
+    <div class="menu-grid">
+      {% for item in featured_items %}
+      <article class="menu-card">
+        <div class="menu-card__img-wrap">
+          {% if item.image %}
+            <img src="{{ item.image.url }}" alt="Photo of {{ item.name }}" loading="lazy">
+          {% else %}
+            <div class="menu-card__img-placeholder" aria-hidden="true">🍽️</div>
+          {% endif %}
+        </div>
+        <div class="menu-card__body">
+          <p class="menu-card__category">{{ item.category.name }}</p>
+          <h3 class="menu-card__name">{{ item.name }}</h3>
+          <p class="menu-card__description">{{ item.description|truncatewords:20 }}</p>
+          {% with tags=item.get_dietary_tags_list %}
+            {% if tags %}
+            <div class="menu-card__tags" aria-label="Dietary information">
+              {% for tag in tags %}
+                <span class="badge badge--{{ tag }}">{{ tag|title|cut:"_" }}</span>
+              {% endfor %}
+            </div>
+            {% endif %}
+          {% endwith %}
+          <div class="menu-card__footer">
+            <span class="menu-card__price" aria-label="Price: ${{ item.price }}">${{ item.price }}</span>
+            <form method="post" action="{% url 'cart_add' item.pk %}">
+              {% csrf_token %}
+              <button type="submit" class="btn btn--primary btn--sm">Add to Cart</button>
+            </form>
+          </div>
+        </div>
+      </article>
+      {% endfor %}
+    </div>
+
+    <div style="text-align:center; margin-top: 2.5rem;">
+      <a href="{% url 'menu' %}" class="btn btn--secondary">View Full Menu</a>
+    </div>
+  </div>
+</section>
+{% endif %}
+<!-- /Featured Dishes ====================================================== -->
+
+<!-- ===== CTA Banner ====================================================== -->
+<section class="section section--dark" aria-labelledby="cta-title">
+  <div class="container" style="text-align:center; max-width: 680px;">
+    <h2 class="section-title" id="cta-title">Ready for an Unforgettable Meal?</h2>
+    <p class="section-subtitle">Reserve your table online in under a minute. Walk-ins are always welcome too.</p>
+    <a href="{% url 'reservation' %}" class="btn btn--primary" style="font-size:1.05rem; padding: 0.8rem 2rem;">
+      Book Your Table
+    </a>
+  </div>
+</section>
+<!-- /CTA ================================================================== -->
+
+{% endblock %}

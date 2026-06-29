@@ -1,0 +1,77 @@
+{% extends 'restaurant/dashboard_base.html' %}
+{% load restaurant_extras %}
+
+{% block title %}Orders{% endblock %}
+
+{% block dashboard_content %}
+<div class="dashboard-header">
+  <h1>Orders</h1>
+  <p>Manage all customer orders. Filter by status or type.</p>
+</div>
+
+<!-- Filters -->
+<div class="data-table-wrap" style="margin-bottom:1.5rem;">
+  <div class="data-table-header">
+    <form method="get" class="filter-bar" aria-label="Filter orders">
+      <label for="status-filter" style="font-size:.85rem; font-weight:600;">Status:</label>
+      <select id="status-filter" name="status" onchange="this.form.submit()" class="form-input form-select-inline">
+        <option value="">All</option>
+        {% for value, label in status_choices %}
+          <option value="{{ value }}" {% if status_filter == value %}selected{% endif %}>{{ label }}</option>
+        {% endfor %}
+      </select>
+
+      <label for="type-filter" style="font-size:.85rem; font-weight:600; margin-left:.5rem;">Type:</label>
+      <select id="type-filter" name="type" onchange="this.form.submit()" class="form-input form-select-inline">
+        <option value="">All</option>
+        {% for value, label in type_choices %}
+          <option value="{{ value }}" {% if type_filter == value %}selected{% endif %}>{{ label }}</option>
+        {% endfor %}
+      </select>
+
+      {% if status_filter or type_filter %}
+        <a href="{% url 'dashboard_orders' %}" class="btn btn--outline btn--sm">Clear</a>
+      {% endif %}
+    </form>
+    <p style="font-size:.82rem; color:var(--color-text-muted);">{{ orders|length }} order{{ orders|length|pluralize }}</p>
+  </div>
+
+  <table class="data-table" aria-label="Orders list">
+    <thead>
+      <tr>
+        <th scope="col">#</th>
+        <th scope="col">Customer</th>
+        <th scope="col">Email</th>
+        <th scope="col">Type</th>
+        <th scope="col">Total</th>
+        <th scope="col">Placed</th>
+        <th scope="col">Status</th>
+        <th scope="col"><span class="sr-only">Update</span></th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for order in orders %}
+      <tr>
+        <td>#{{ order.pk }}</td>
+        <td>{{ order.customer_name }}</td>
+        <td style="font-size:.82rem;">{{ order.email }}</td>
+        <td><span class="chip chip--{{ order.order_type }}">{{ order.get_order_type_display }}</span></td>
+        <td>${{ order.total_price }}</td>
+        <td style="white-space:nowrap; font-size:.82rem;">{{ order.created_at|date:"M j, Y g:i A" }}</td>
+        <td><span class="chip chip--{{ order.status }}">{{ order.get_status_display }}</span></td>
+        <td>
+          <form method="post" action="{% url 'update_order_status' order.pk %}" style="display:flex; gap:.5rem; align-items:center;">
+            {% csrf_token %}
+            {{ status_forms|get_item:order.pk }}
+            <button type="submit" class="btn btn--secondary btn--sm">Save</button>
+          </form>
+        </td>
+      </tr>
+      {% empty %}
+        <tr><td colspan="8" style="text-align:center; color:var(--color-text-muted); padding:2rem;">No orders found.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+{% endblock %}

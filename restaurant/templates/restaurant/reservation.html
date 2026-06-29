@@ -1,0 +1,85 @@
+{% extends 'restaurant/base.html' %}
+{% load static %}
+
+{% block title %}Reservations{% endblock %}
+{% block meta_description %}Reserve a table at Little Lemon — quick, easy, and confirmed instantly.{% endblock %}
+
+{% block content %}
+
+<div class="page-hero">
+  <div class="container">
+    <h1>Reserve a Table</h1>
+    <p>Pick your date, party size, and we'll have everything ready for you.</p>
+  </div>
+</div>
+
+<section class="section section--cream">
+  <div class="container form-section">
+    <div class="form-card">
+      <form method="post" novalidate>
+        {% csrf_token %}
+
+        <div class="form-group">
+          <label class="form-label" for="{{ form.name.id_for_label }}">
+            Full Name <span class="required" aria-hidden="true">*</span>
+          </label>
+          {{ form.name }}
+          {% if form.name.errors %}<ul class="errorlist">{% for e in form.name.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="{{ form.email.id_for_label }}">Email Address</label>
+          {{ form.email }}
+          {% if form.email.errors %}<ul class="errorlist">{% for e in form.email.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="{{ form.contact.id_for_label }}">
+            Phone Number <span class="required" aria-hidden="true">*</span>
+          </label>
+          {{ form.contact }}
+          {% if form.contact.errors %}<ul class="errorlist">{% for e in form.contact.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
+        </div>
+
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:1rem;">
+          <div class="form-group">
+            <label class="form-label" for="{{ form.time.id_for_label }}">
+              Date &amp; Time <span class="required" aria-hidden="true">*</span>
+            </label>
+            {{ form.time }}
+            {% if form.time.errors %}<ul class="errorlist">{% for e in form.time.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="{{ form.count.id_for_label }}">
+              Party Size <span class="required" aria-hidden="true">*</span>
+            </label>
+            {{ form.count }}
+            {% if form.count.errors %}<ul class="errorlist">{% for e in form.count.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="{{ form.item.id_for_label }}">
+            Pre-order a dish <span style="font-weight:400; color:var(--color-text-muted);">(optional)</span>
+          </label>
+          {{ form.item }}
+          <p class="form-help">Want to guarantee a popular item? Reserve it now.</p>
+          {% if form.item.errors %}<ul class="errorlist">{% for e in form.item.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="{{ form.notes.id_for_label }}">Special Requests</label>
+          {{ form.notes }}
+          {% if form.notes.errors %}<ul class="errorlist">{% for e in form.notes.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
+        </div>
+
+        <button type="submit" class="btn btn--primary btn--full" style="font-size:1rem;">
+          Confirm Reservation
+        </button>
+      </form>
+    </div>
+  </div>
+</section>
+
+{% endblock %}

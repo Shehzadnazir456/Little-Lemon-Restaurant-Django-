@@ -1,0 +1,36 @@
+{% load static %}
+{# Reusable menu card partial — expects `item` in context #}
+<article class="menu-card">
+  <div class="menu-card__img-wrap">
+    {% if item.image %}
+      <img src="{{ item.image.url }}" alt="Photo of {{ item.name }}" loading="lazy">
+    {% else %}
+      <div class="menu-card__img-placeholder" aria-hidden="true">🍽️</div>
+    {% endif %}
+  </div>
+  <div class="menu-card__body">
+    {% if item.category %}
+      <p class="menu-card__category">{{ item.category.name }}</p>
+    {% endif %}
+    <h3 class="menu-card__name">{{ item.name }}</h3>
+    <p class="menu-card__description">{{ item.description }}</p>
+
+    {% with tags=item.get_dietary_tags_list %}
+      {% if tags %}
+      <div class="menu-card__tags" aria-label="Dietary information">
+        {% for tag in tags %}
+          <span class="badge badge--{{ tag }}">{{ tag|title|cut:"_" }}</span>
+        {% endfor %}
+      </div>
+      {% endif %}
+    {% endwith %}
+
+    <div class="menu-card__footer">
+      <span class="menu-card__price" aria-label="Price: ${{ item.price }}">${{ item.price }}</span>
+      <form method="post" action="{% url 'cart_add' item.pk %}">
+        {% csrf_token %}
+        <button type="submit" class="btn btn--primary btn--sm">Add to Cart</button>
+      </form>
+    </div>
+  </div>
+</article>

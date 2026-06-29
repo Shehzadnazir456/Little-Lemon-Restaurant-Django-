@@ -1,0 +1,96 @@
+{% extends 'restaurant/dashboard_base.html' %}
+
+{% block title %}Overview{% endblock %}
+
+{% block dashboard_content %}
+<div class="dashboard-header">
+  <h1>Good day, {{ request.user.get_full_name|default:request.user.username }} 👋</h1>
+  <p>Here's what's happening at Little Lemon today.</p>
+</div>
+
+<!-- Stats -->
+<div class="stats-grid" aria-label="Today's statistics">
+  <div class="stat-card">
+    <div class="stat-card__icon" aria-hidden="true">📦</div>
+    <p class="stat-card__label">Orders Today</p>
+    <p class="stat-card__value">{{ total_orders_today }}</p>
+  </div>
+  <div class="stat-card">
+    <div class="stat-card__icon" aria-hidden="true">📅</div>
+    <p class="stat-card__label">Reservations Today</p>
+    <p class="stat-card__value">{{ total_reservations_today }}</p>
+  </div>
+  <div class="stat-card">
+    <div class="stat-card__icon" aria-hidden="true">💰</div>
+    <p class="stat-card__label">Revenue Today</p>
+    <p class="stat-card__value">${{ revenue_today|floatformat:2 }}</p>
+  </div>
+</div>
+
+<!-- Recent Orders -->
+<div class="data-table-wrap">
+  <div class="data-table-header">
+    <h2>Recent Orders</h2>
+    <a href="{% url 'dashboard_orders' %}" class="btn btn--outline btn--sm">View All</a>
+  </div>
+  <table class="data-table" aria-label="Recent orders">
+    <thead>
+      <tr>
+        <th scope="col">#</th>
+        <th scope="col">Customer</th>
+        <th scope="col">Type</th>
+        <th scope="col">Total</th>
+        <th scope="col">Status</th>
+        <th scope="col">Time</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for order in recent_orders %}
+      <tr>
+        <td><a href="{% url 'dashboard_orders' %}?search={{ order.pk }}">#{{ order.pk }}</a></td>
+        <td>{{ order.customer_name }}</td>
+        <td><span class="chip chip--{{ order.order_type }}">{{ order.get_order_type_display }}</span></td>
+        <td>${{ order.total_price }}</td>
+        <td><span class="chip chip--{{ order.status }}">{{ order.get_status_display }}</span></td>
+        <td style="white-space:nowrap;">{{ order.created_at|date:"M j, g:i A" }}</td>
+      </tr>
+      {% empty %}
+        <tr><td colspan="6" style="text-align:center; color:var(--color-text-muted); padding:2rem;">No orders yet.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+<!-- Recent Reservations -->
+<div class="data-table-wrap">
+  <div class="data-table-header">
+    <h2>Upcoming Reservations</h2>
+    <a href="{% url 'dashboard_reservations' %}" class="btn btn--outline btn--sm">View All</a>
+  </div>
+  <table class="data-table" aria-label="Upcoming reservations">
+    <thead>
+      <tr>
+        <th scope="col">Guest</th>
+        <th scope="col">Date &amp; Time</th>
+        <th scope="col">Party</th>
+        <th scope="col">Status</th>
+        <th scope="col">Contact</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for res in recent_reservations %}
+      <tr>
+        <td>{{ res.name }}</td>
+        <td style="white-space:nowrap;">{{ res.time|date:"M j, Y g:i A" }}</td>
+        <td>{{ res.count }} guests</td>
+        <td><span class="chip chip--{{ res.status }}">{{ res.get_status_display }}</span></td>
+        <td>{{ res.contact }}</td>
+      </tr>
+      {% empty %}
+        <tr><td colspan="5" style="text-align:center; color:var(--color-text-muted); padding:2rem;">No reservations yet.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+{% endblock %}

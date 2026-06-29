@@ -1,0 +1,78 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}Dashboard{% endblock %} | Little Lemon</title>
+  <link rel="stylesheet" href="{% static 'css/style.css' %}">
+</head>
+<body>
+
+<!-- Sticky top bar (shared with main site navbar style) -->
+<header>
+  <nav class="navbar" aria-label="Dashboard navigation">
+    <div class="container navbar__inner">
+      <a href="{% url 'dashboard' %}" class="navbar__brand">
+        <span class="navbar__brand-icon" aria-hidden="true">🍋</span>
+        Little Lemon
+      </a>
+      <div style="display:flex; align-items:center; gap:1.5rem;">
+        <span style="font-size:.85rem; color:var(--color-text-muted);">
+          👤 {{ request.user.get_full_name|default:request.user.username }}
+        </span>
+        <a href="{% url 'home' %}" style="font-size:.85rem;">View site →</a>
+        <a href="{% url 'dashboard_logout' %}" class="btn btn--outline btn--sm">Log Out</a>
+      </div>
+    </div>
+  </nav>
+</header>
+
+{% if messages %}
+<div class="container" style="margin-top:1rem;" role="alert" aria-live="polite">
+  <ul class="messages">
+    {% for message in messages %}
+      <li class="message {{ message.tags }}">{{ message }}</li>
+    {% endfor %}
+  </ul>
+</div>
+{% endif %}
+
+<div class="dashboard-layout" id="main-content">
+
+  <!-- Sidebar -->
+  <aside class="sidebar" aria-label="Dashboard sidebar">
+    <p class="sidebar__title">Dashboard</p>
+    <nav class="sidebar__nav">
+      <a href="{% url 'dashboard' %}"
+         class="{% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}">
+        <span class="nav-icon" aria-hidden="true">📊</span> Overview
+      </a>
+      <a href="{% url 'dashboard_orders' %}"
+         class="{% if 'order' in request.resolver_match.url_name %}active{% endif %}">
+        <span class="nav-icon" aria-hidden="true">📋</span> Orders
+      </a>
+      <a href="{% url 'dashboard_reservations' %}"
+         class="{% if 'reservation' in request.resolver_match.url_name %}active{% endif %}">
+        <span class="nav-icon" aria-hidden="true">📅</span> Reservations
+      </a>
+      <a href="/admin/">
+        <span class="nav-icon" aria-hidden="true">⚙️</span> Django Admin
+      </a>
+    </nav>
+    <div class="sidebar__logout">
+      <a href="{% url 'dashboard_logout' %}" class="sidebar__nav" style="color:rgba(255,255,255,.6); font-size:.85rem;">
+        Sign Out
+      </a>
+    </div>
+  </aside>
+
+  <!-- Main content -->
+  <main class="dashboard-main">
+    {% block dashboard_content %}{% endblock %}
+  </main>
+
+</div>
+
+</body>
+</html>

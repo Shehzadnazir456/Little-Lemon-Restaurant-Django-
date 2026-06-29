@@ -1,0 +1,78 @@
+{% extends 'restaurant/base.html' %}
+{% load static %}
+
+{% block title %}Order Confirmed — #{{ order.pk }}{% endblock %}
+
+{% block content %}
+<section class="section section--cream">
+  <div class="container" style="max-width:700px; margin-inline:auto;">
+    <div class="confirmation-card">
+      <div class="confirmation-icon" aria-hidden="true">✅</div>
+      <p class="order-number">Order #{{ order.pk }}</p>
+      <h1 style="font-size:1.6rem; margin-bottom:.5rem; color:var(--color-secondary);">Thank you, {{ order.customer_name }}!</h1>
+      <p style="color:var(--color-text-muted); margin-bottom:2rem;">
+        Your order has been received and is currently <strong>{{ order.get_status_display }}</strong>.
+        A confirmation has been sent to <strong>{{ order.email }}</strong>.
+      </p>
+
+      <div style="background:var(--color-bg); border-radius:var(--radius-md); padding:1.5rem; margin-bottom:1.5rem; text-align:left;">
+        <h2 style="font-size:1rem; color:var(--color-secondary); margin-bottom:1rem;">Order Summary</h2>
+        <table style="width:100%; border-collapse:collapse;" aria-label="Order items">
+          <thead>
+            <tr style="border-bottom:2px solid var(--color-bg-dark);">
+              <th style="padding:.5rem; text-align:left; font-size:.8rem; text-transform:uppercase; color:var(--color-text-muted);">Item</th>
+              <th style="padding:.5rem; text-align:center; font-size:.8rem; text-transform:uppercase; color:var(--color-text-muted);">Prep time</th>
+              <th style="padding:.5rem; text-align:right; font-size:.8rem; text-transform:uppercase; color:var(--color-text-muted);">Qty</th>
+              <th style="padding:.5rem; text-align:right; font-size:.8rem; text-transform:uppercase; color:var(--color-text-muted);">Price</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for oi in order_items %}
+            <tr style="border-bottom:1px solid var(--color-bg-dark);">
+              <td style="padding:.6rem .5rem;">{{ oi.menu_item.name }}</td>
+              <td style="padding:.6rem .5rem; text-align:center;">
+                <span style="font-size:.78rem; background:var(--color-bg-dark); border-radius:var(--radius-full); padding:2px 8px;">
+                  ⏱ ~{{ oi.menu_item.prep_time_minutes }} min
+                </span>
+              </td>
+              <td style="padding:.6rem .5rem; text-align:right;">{{ oi.quantity }}</td>
+              <td style="padding:.6rem .5rem; text-align:right;">${{ oi.subtotal }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+          <tfoot>
+            <tr>
+              <td colspan="3" style="padding:.8rem .5rem; font-weight:700; text-align:right;">Total</td>
+              <td style="padding:.8rem .5rem; font-weight:700; text-align:right;">${{ order.total_price }}</td>
+            </tr>
+          </tfoot>
+        </table>
+
+        <div style="margin-top:1rem; display:grid; gap:.4rem; font-size:.9rem;">
+          <p><strong>Order type:</strong> {{ order.get_order_type_display }}</p>
+          <p>
+            <strong>Estimated ready in:</strong>
+            ~{{ order.estimated_prep_minutes }} minutes
+            <span style="color:var(--color-text-muted); font-size:.82rem;">
+              (by {{ order.eta|time:"g:i A" }})
+            </span>
+          </p>
+          {% if order.order_type == 'takeaway' and order.delivery_address %}
+            <p><strong>Delivery address:</strong> {{ order.delivery_address }}</p>
+          {% endif %}
+          {% if order.order_type == 'dine_in' and order.party_size %}
+            <p><strong>Party size:</strong> {{ order.party_size }}</p>
+          {% endif %}
+        </div>
+      </div>
+
+      <div style="display:flex; gap:1rem; justify-content:center; flex-wrap:wrap;">
+        <a href="{% url 'order_status' %}?order_id={{ order.pk }}&email={{ order.email }}" class="btn btn--secondary">
+          Track Order
+        </a>
+        <a href="{% url 'menu' %}" class="btn btn--outline">Back to Menu</a>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}

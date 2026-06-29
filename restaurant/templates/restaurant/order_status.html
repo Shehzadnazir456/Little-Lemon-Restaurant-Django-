@@ -1,0 +1,440 @@
+{% extends 'restaurant/base.html' %}
+{% load static %}
+
+{% block title %}Order Status{% endblock %}
+{% block meta_description %}Track your Little Lemon order in real time.{% endblock %}
+
+{% block extra_head %}
+<style>
+/* ── Tracker card ───────────────────────────────────────────────── */
+.tracker-card {
+  background: var(--color-white);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+  overflow: hidden;
+  margin-bottom: 1.5rem;
+}
+
+/* Header strip */
+.tracker-header {
+  background: var(--color-secondary);
+  padding: 1.5rem 2rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+.tracker-header__order { color: var(--color-primary); font-size: 1.05rem; font-weight: 700; }
+.tracker-header__meta  { color: rgba(255,255,255,.7); font-size: .82rem; }
+
+/* Live badge */
+.live-badge {
+  display: inline-flex; align-items: center; gap: 6px;
+  background: rgba(244,206,20,.15);
+  border: 1px solid rgba(244,206,20,.4);
+  color: var(--color-primary);
+  font-size: .72rem; font-weight: 700; letter-spacing: .06em; text-transform: uppercase;
+  padding: 3px 10px; border-radius: var(--radius-full);
+}
+.live-dot {
+  width: 7px; height: 7px;
+  border-radius: 50%;
+  background: var(--color-primary);
+  animation: pulse 1.5s infinite;
+}
+
+/* Body padding */
+.tracker-body { padding: 2rem; }
+
+/* ETA countdown */
+.eta-block {
+  display: flex; align-items: center; justify-content: space-between;
+  background: var(--color-bg);
+  border-radius: var(--radius-md);
+  padding: 1rem 1.5rem;
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap; gap: .75rem;
+}
+.eta-label { font-size: .78rem; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: var(--color-text-muted); }
+.eta-time  { font-size: 2rem; font-weight: 700; color: var(--color-secondary); line-height: 1; font-family: var(--font-mono); }
+.eta-sub   { font-size: .8rem; color: var(--color-text-muted); margin-top: 2px; }
+.eta-type  { text-align: right; }
+.eta-type .chip { font-size: .82rem; padding: 5px 14px; }
+
+/* Progress bar */
+.progress-wrap { margin-bottom: 1.75rem; }
+.progress-label {
+  display: flex; justify-content: space-between;
+  font-size: .8rem; color: var(--color-text-muted); margin-bottom: .4rem;
+}
+.progress-bar-bg {
+  height: 10px; background: var(--color-bg-dark);
+  border-radius: var(--radius-full); overflow: hidden;
+}
+.progress-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--color-secondary), var(--color-primary));
+  border-radius: var(--radius-full);
+  transition: width .8s ease;
+  width: 0%;
+}
+
+/* Status steps */
+.steps { display: flex; margin-bottom: 2rem; }
+.step {
+  flex: 1; text-align: center; position: relative;
+  padding-top: 2.5rem;
+}
+.step::before {
+  content: '';
+  position: absolute; top: 14px; left: -50%; right: 50%;
+  height: 2px; background: var(--color-bg-dark);
+  transition: background .4s;
+}
+.step:first-child::before { display: none; }
+.step.done::before, .step.active::before { background: var(--color-secondary); }
+.step__dot {
+  position: absolute; top: 0; left: 50%; transform: translateX(-50%);
+  width: 28px; height: 28px; border-radius: 50%;
+  background: var(--color-bg-dark); color: var(--color-text-muted);
+  display: flex; align-items: center; justify-content: center;
+  font-size: .75rem; font-weight: 700; z-index: 1;
+  transition: background .4s, color .4s;
+  border: 2px solid transparent;
+}
+.step.done   .step__dot { background: var(--color-secondary); color: var(--color-white); border-color: var(--color-secondary); }
+.step.active .step__dot { background: var(--color-white);     color: var(--color-secondary); border-color: var(--color-secondary); box-shadow: 0 0 0 3px rgba(73,94,87,.2); }
+.step__label { font-size: .72rem; font-weight: 600; color: var(--color-text-muted); }
+.step.done .step__label, .step.active .step__label { color: var(--color-secondary); }
+
+/* Items table inside tracker */
+.tracker-items { border-top: 1px solid var(--color-bg-dark); padding-top: 1.5rem; margin-top: 1.5rem; }
+.tracker-items h3 { font-size: .82rem; text-transform: uppercase; letter-spacing: .06em; color: var(--color-text-muted); margin-bottom: 1rem; }
+.item-row {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: .6rem 0; border-bottom: 1px solid var(--color-bg-dark);
+  gap: 1rem; flex-wrap: wrap;
+}
+.item-row:last-child { border-bottom: none; }
+.item-row__name { font-size: .92rem; font-weight: 600; }
+.item-row__qty  { font-size: .82rem; color: var(--color-text-muted); }
+.item-prep {
+  display: flex; align-items: center; gap: 5px;
+  font-size: .78rem; color: var(--color-text-muted);
+  background: var(--color-bg); border-radius: var(--radius-full);
+  padding: 2px 10px;
+}
+.item-row__price { font-weight: 700; font-size: .92rem; }
+
+/* Cancelled / completed states */
+.status-banner {
+  text-align: center; padding: 1.25rem;
+  border-radius: var(--radius-md); margin-bottom: 1.5rem;
+  font-size: 1rem; font-weight: 600;
+}
+.status-banner--done      { background: #d4edda; color: #155724; }
+.status-banner--cancelled { background: #fde8e6; color: #7b1d15; }
+
+/* Refresh notice */
+.refresh-note { font-size: .75rem; color: var(--color-text-muted); text-align: right; margin-top: .5rem; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page-hero">
+  <div class="container">
+    <h1>Track Your Order</h1>
+    <p>Enter your order number and email — the status updates automatically.</p>
+  </div>
+</div>
+
+<section class="section section--cream">
+  <div class="container" style="max-width:640px; margin-inline:auto;">
+
+    <!-- Lookup form -->
+    <div class="form-card" style="margin-bottom:2rem;">
+      <form method="get" id="lookup-form" novalidate>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:1rem;">
+          <div class="form-group">
+            <label class="form-label" for="{{ form.order_id.id_for_label }}">
+              Order Number <span class="required" aria-hidden="true">*</span>
+            </label>
+            {{ form.order_id }}
+            {% if form.order_id.errors %}<ul class="errorlist">{% for e in form.order_id.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="{{ form.email.id_for_label }}">
+              Email <span class="required" aria-hidden="true">*</span>
+            </label>
+            {{ form.email }}
+            {% if form.email.errors %}<ul class="errorlist">{% for e in form.email.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
+          </div>
+        </div>
+        <button type="submit" class="btn btn--primary btn--full">Track Order</button>
+      </form>
+    </div>
+
+    {% if order %}
+    <!-- ═══ Live tracker ══════════════════════════════════════════════════ -->
+    <div class="tracker-card" id="tracker"
+         data-order-id="{{ order.pk }}"
+         data-email="{{ order.email }}"
+         data-api-url="{% url 'order_status_api' order.pk %}">
+
+      <!-- Header -->
+      <div class="tracker-header">
+        <div>
+          <p class="tracker-header__order">Order #{{ order.pk }} &mdash; {{ order.customer_name }}</p>
+          <p class="tracker-header__meta">Placed {{ order.created_at|date:"N j, Y \a\t g:i A" }}</p>
+        </div>
+        <span class="live-badge" id="live-badge" aria-live="polite">
+          <span class="live-dot" aria-hidden="true"></span>
+          Live
+        </span>
+      </div>
+
+      <div class="tracker-body">
+
+        <!-- Cancelled banner (hidden by JS if status changes) -->
+        <div class="status-banner status-banner--cancelled" id="banner-cancelled"
+             style="display:{% if order.status == 'cancelled' %}block{% else %}none{% endif %};" role="alert">
+          ❌ This order has been cancelled.
+        </div>
+        <div class="status-banner status-banner--done" id="banner-completed"
+             style="display:{% if order.status == 'completed' %}block{% else %}none{% endif %};" role="status">
+          ✅ Your order is complete. Enjoy your meal!
+        </div>
+
+        <!-- ETA countdown -->
+        <div class="eta-block" id="eta-block">
+          <div>
+            <p class="eta-label">
+              {% if order.order_type == 'takeaway' %}Ready for pickup in{% else %}Ready at your table in{% endif %}
+            </p>
+            <p class="eta-time" id="eta-countdown" aria-live="polite">-- : --</p>
+            <p class="eta-sub" id="eta-sub">Calculating…</p>
+          </div>
+          <div class="eta-type">
+            <span class="chip chip--{{ order.order_type }}" id="type-chip">{{ order.get_order_type_display }}</span>
+            {% if order.order_type == 'takeaway' and order.delivery_address %}
+              <p style="font-size:.78rem; color:var(--color-text-muted); margin-top:.4rem; max-width:180px;">{{ order.delivery_address }}</p>
+            {% endif %}
+            {% if order.order_type == 'dine_in' and order.party_size %}
+              <p style="font-size:.78rem; color:var(--color-text-muted); margin-top:.4rem;">Party of {{ order.party_size }}</p>
+            {% endif %}
+          </div>
+        </div>
+
+        <!-- Progress bar -->
+        <div class="progress-wrap">
+          <div class="progress-label">
+            <span id="progress-label-left">Preparing your order…</span>
+            <span id="progress-label-right">0%</span>
+          </div>
+          <div class="progress-bar-bg" role="progressbar" aria-valuemin="0" aria-valuemax="100" id="progress-bar-wrap">
+            <div class="progress-bar-fill" id="progress-bar" style="width:0%;"></div>
+          </div>
+        </div>
+
+        <!-- Status steps -->
+        <nav class="steps" aria-label="Order progress steps" id="steps-nav">
+          {% for step_key, step_label in order_steps %}
+          <div class="step {% if order.status == step_key %}active{% elif order_step_index > forloop.counter0 %}done{% endif %}"
+               id="step-{{ step_key }}" aria-label="{{ step_label }}">
+            <div class="step__dot" aria-hidden="true">
+              {% if order_step_index > forloop.counter0 %}✓
+              {% else %}{{ forloop.counter }}{% endif %}
+            </div>
+            <p class="step__label">{{ step_label }}</p>
+          </div>
+          {% endfor %}
+        </nav>
+
+        <!-- Per-item breakdown with prep times -->
+        <div class="tracker-items">
+          <h3>Your Items</h3>
+          {% for oi in order_items %}
+          <div class="item-row">
+            <div>
+              <p class="item-row__name">{{ oi.menu_item.name }}</p>
+              <p class="item-row__qty">Qty: {{ oi.quantity }}</p>
+            </div>
+            <span class="item-prep" title="Estimated prep time for this dish">
+              ⏱ ~{{ oi.menu_item.prep_time_minutes }} min
+            </span>
+            <p class="item-row__price">${{ oi.subtotal }}</p>
+          </div>
+          {% endfor %}
+          <div style="display:flex; justify-content:space-between; padding-top:1rem; font-weight:700;">
+            <span>Total</span>
+            <span>${{ order.total_price }}</span>
+          </div>
+        </div>
+
+        <p class="refresh-note" id="refresh-note">Updates automatically every 15 seconds</p>
+      </div>
+    </div>
+    <!-- /tracker ════════════════════════════════════════════════════════ -->
+
+    {% endif %}
+
+  </div>
+</section>
+{% endblock %}
+
+{% block extra_scripts %}
+{% if order %}
+<script>
+(function () {
+  "use strict";
+
+  const tracker   = document.getElementById('tracker');
+  const orderId   = tracker.dataset.orderId;
+  const email     = tracker.dataset.email;
+  const apiUrl    = tracker.dataset.apiUrl;
+
+  // Step ordering (must match Order.Status keys in sequence)
+  const STEPS = ['pending', 'preparing', 'ready', 'completed'];
+  const STATUS_LABELS = {
+    pending:   'Pending',
+    preparing: 'Preparing',
+    ready:     'Ready',
+    completed: 'Completed',
+    cancelled: 'Cancelled',
+  };
+
+  const $countdown   = document.getElementById('eta-countdown');
+  const $etaSub      = document.getElementById('eta-sub');
+  const $bar         = document.getElementById('progress-bar');
+  const $barWrap     = document.getElementById('progress-bar-wrap');
+  const $labelLeft   = document.getElementById('progress-label-left');
+  const $labelRight  = document.getElementById('progress-label-right');
+  const $refreshNote = document.getElementById('refresh-note');
+  const $liveBadge   = document.getElementById('live-badge');
+  const $bannerDone  = document.getElementById('banner-completed');
+  const $bannerCancel = document.getElementById('banner-cancelled');
+
+  let currentStatus  = "{{ order.status }}";
+  let etaDate        = null;
+  let countdownTimer = null;
+
+  // ── Tick the countdown every second ────────────────────────────────────
+  function tickCountdown() {
+    if (!etaDate) return;
+    const now     = Date.now();
+    const diffMs  = etaDate - now;
+    const diffSec = Math.max(0, Math.floor(diffMs / 1000));
+    const mins    = Math.floor(diffSec / 60);
+    const secs    = diffSec % 60;
+
+    if (['completed', 'ready', 'cancelled'].includes(currentStatus)) {
+      $countdown.textContent = currentStatus === 'cancelled' ? '—' : '✓';
+      $etaSub.textContent    = STATUS_LABELS[currentStatus] || currentStatus;
+      return;
+    }
+
+    if (diffSec === 0) {
+      $countdown.textContent = '00 : 00';
+      $etaSub.textContent = 'Any moment now…';
+    } else {
+      $countdown.textContent = String(mins).padStart(2, '0') + ' : ' + String(secs).padStart(2, '0');
+      $etaSub.textContent = mins > 0
+        ? `Ready in approximately ${mins} minute${mins !== 1 ? 's' : ''}`
+        : 'Ready very soon';
+    }
+  }
+
+  // ── Update DOM from API data ───────────────────────────────────────────
+  function applyData(data) {
+    currentStatus = data.status;
+    etaDate       = new Date(data.eta_iso);
+
+    // Progress bar
+    const pct = data.progress_pct;
+    $bar.style.width = pct + '%';
+    $barWrap.setAttribute('aria-valuenow', pct);
+    $labelRight.textContent = pct + '%';
+
+    // Label
+    if (data.status === 'cancelled') {
+      $labelLeft.textContent = 'Order cancelled';
+    } else if (data.status === 'completed') {
+      $labelLeft.textContent = 'Order complete!';
+    } else if (data.status === 'ready') {
+      $labelLeft.textContent = 'Your order is ready!';
+    } else if (data.status === 'preparing') {
+      $labelLeft.textContent = `Preparing — estimated ${data.total_minutes} min total`;
+    } else {
+      $labelLeft.textContent = 'Waiting to be accepted…';
+    }
+
+    // Steps
+    const currentIdx = STEPS.indexOf(data.status);
+    STEPS.forEach((key, idx) => {
+      const el = document.getElementById('step-' + key);
+      if (!el) return;
+      el.classList.remove('done', 'active');
+      const dot = el.querySelector('.step__dot');
+      if (idx < currentIdx) {
+        el.classList.add('done');
+        dot.textContent = '✓';
+      } else if (idx === currentIdx) {
+        el.classList.add('active');
+        dot.textContent = idx + 1;
+      } else {
+        dot.textContent = idx + 1;
+      }
+    });
+
+    // Banners
+    $bannerDone.style.display   = data.status === 'completed' ? 'block' : 'none';
+    $bannerCancel.style.display = data.status === 'cancelled' ? 'block' : 'none';
+
+    // Stop polling on terminal states
+    if (data.status === 'completed' || data.status === 'cancelled') {
+      $liveBadge.textContent = data.status === 'completed' ? '✓ Done' : '✗ Cancelled';
+      $liveBadge.style.background = data.status === 'completed' ? 'rgba(58,138,75,.15)' : 'rgba(192,57,43,.15)';
+      if (countdownTimer) clearInterval(countdownTimer);
+      stopPolling();
+    }
+  }
+
+  // ── Fetch from API ────────────────────────────────────────────────────
+  async function fetchStatus() {
+    try {
+      const url      = apiUrl + '?email=' + encodeURIComponent(email);
+      const response = await fetch(url, { cache: 'no-store' });
+      if (!response.ok) return;
+      const data = await response.json();
+      applyData(data);
+    } catch (e) {
+      // Network error — silently skip, try again next interval
+    }
+    const ts = new Date().toLocaleTimeString();
+    $refreshNote.textContent = 'Last updated: ' + ts + ' (auto-refreshes every 15 s)';
+  }
+
+  // ── Polling control ───────────────────────────────────────────────────
+  let pollInterval = null;
+  function startPolling() {
+    fetchStatus();  // immediate first fetch
+    pollInterval = setInterval(fetchStatus, 15000);
+  }
+  function stopPolling() {
+    if (pollInterval) clearInterval(pollInterval);
+  }
+
+  // ── Boot ──────────────────────────────────────────────────────────────
+  // Seed ETA from server-rendered data so countdown starts immediately
+  etaDate = new Date("{{ order.eta.isoformat }}");
+  currentStatus = "{{ order.status }}";
+
+  tickCountdown();
+  countdownTimer = setInterval(tickCountdown, 1000);
+  startPolling();
+
+})();
+</script>
+{% endif %}
+{% endblock %}

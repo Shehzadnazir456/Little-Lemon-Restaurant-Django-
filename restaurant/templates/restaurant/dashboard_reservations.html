@@ -1,0 +1,67 @@
+{% extends 'restaurant/dashboard_base.html' %}
+{% load restaurant_extras %}
+
+{% block title %}Reservations{% endblock %}
+
+{% block dashboard_content %}
+<div class="dashboard-header">
+  <h1>Reservations</h1>
+  <p>Confirm or cancel upcoming reservations.</p>
+</div>
+
+<!-- Filters -->
+<div class="data-table-wrap">
+  <div class="data-table-header">
+    <form method="get" class="filter-bar" aria-label="Filter reservations">
+      <label for="status-filter" style="font-size:.85rem; font-weight:600;">Status:</label>
+      <select id="status-filter" name="status" onchange="this.form.submit()" class="form-input form-select-inline">
+        <option value="">All</option>
+        {% for value, label in status_choices %}
+          <option value="{{ value }}" {% if status_filter == value %}selected{% endif %}>{{ label }}</option>
+        {% endfor %}
+      </select>
+      {% if status_filter %}
+        <a href="{% url 'dashboard_reservations' %}" class="btn btn--outline btn--sm">Clear</a>
+      {% endif %}
+    </form>
+    <p style="font-size:.82rem; color:var(--color-text-muted);">{{ reservations|length }} reservation{{ reservations|length|pluralize }}</p>
+  </div>
+
+  <table class="data-table" aria-label="Reservations list">
+    <thead>
+      <tr>
+        <th scope="col">Guest</th>
+        <th scope="col">Date &amp; Time</th>
+        <th scope="col">Party</th>
+        <th scope="col">Contact</th>
+        <th scope="col">Pre-order</th>
+        <th scope="col">Notes</th>
+        <th scope="col">Status</th>
+        <th scope="col"><span class="sr-only">Update</span></th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for res in reservations %}
+      <tr>
+        <td>{{ res.name }}</td>
+        <td style="white-space:nowrap;">{{ res.time|date:"M j, Y g:i A" }}</td>
+        <td>{{ res.count }}</td>
+        <td>{{ res.contact }}</td>
+        <td>{% if res.item %}{{ res.item.name }}{% else %}&mdash;{% endif %}</td>
+        <td style="font-size:.82rem; color:var(--color-text-muted); max-width:160px;">{{ res.notes|truncatechars:60 }}</td>
+        <td><span class="chip chip--{{ res.status }}">{{ res.get_status_display }}</span></td>
+        <td>
+          <form method="post" action="{% url 'update_reservation_status' res.pk %}" style="display:flex; gap:.5rem; align-items:center;">
+            {% csrf_token %}
+            {{ status_forms|get_item:res.pk }}
+            <button type="submit" class="btn btn--secondary btn--sm">Save</button>
+          </form>
+        </td>
+      </tr>
+      {% empty %}
+        <tr><td colspan="8" style="text-align:center; color:var(--color-text-muted); padding:2rem;">No reservations found.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

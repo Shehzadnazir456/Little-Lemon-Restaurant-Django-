@@ -1,0 +1,114 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="{% block meta_description %}Little Lemon — authentic Mediterranean restaurant. Fresh ingredients, bold flavours.{% endblock %}">
+  <title>{% block title %}Little Lemon{% endblock %} | Little Lemon Restaurant</title>
+  <link rel="stylesheet" href="{% static 'css/style.css' %}">
+  {% block extra_head %}{% endblock %}
+</head>
+<body>
+
+<!-- ===== Navigation ===================================================== -->
+<header>
+  <nav class="navbar" aria-label="Main navigation">
+    <div class="container navbar__inner">
+
+      <a href="{% url 'home' %}" class="navbar__brand" aria-label="Little Lemon home">
+        <span class="navbar__brand-icon" aria-hidden="true">🍋</span>
+        Little Lemon
+      </a>
+
+      <ul class="navbar__links" id="nav-links" role="list">
+        <li><a href="{% url 'home' %}"        {% if request.resolver_match.url_name == 'home' %}class="active"{% endif %}>Home</a></li>
+        <li><a href="{% url 'menu' %}"        {% if request.resolver_match.url_name == 'menu' %}class="active"{% endif %}>Menu</a></li>
+        <li><a href="{% url 'reservation' %}" {% if request.resolver_match.url_name == 'reservation' %}class="active"{% endif %}>Reservations</a></li>
+        <li><a href="{% url 'about' %}"       {% if request.resolver_match.url_name == 'about' %}class="active"{% endif %}>About</a></li>
+        <li><a href="{% url 'contact' %}"     {% if request.resolver_match.url_name == 'contact' %}class="active"{% endif %}>Contact</a></li>
+        <li>
+          <a href="{% url 'cart_view' %}" class="navbar__cart-link" aria-label="View cart">
+            🛒
+            {% if cart_count and cart_count > 0 %}
+              <span class="cart-badge" aria-label="{{ cart_count }} items in cart">{{ cart_count }}</span>
+            {% endif %}
+          </a>
+        </li>
+        <li><a href="{% url 'reservation' %}" class="navbar__cta">Book a Table</a></li>
+      </ul>
+
+      <button class="navbar__toggle" id="nav-toggle" aria-expanded="false" aria-controls="nav-links" aria-label="Toggle navigation">
+        <span></span><span></span><span></span>
+      </button>
+
+    </div>
+  </nav>
+</header>
+<!-- /Navigation =========================================================== -->
+
+<!-- ===== Messages ======================================================= -->
+{% if messages %}
+<div class="container" style="margin-top: 1rem;" role="alert" aria-live="polite">
+  <ul class="messages">
+    {% for message in messages %}
+      <li class="message {{ message.tags }}">{{ message }}</li>
+    {% endfor %}
+  </ul>
+</div>
+{% endif %}
+<!-- /Messages ============================================================= -->
+
+<main id="main-content">
+  {% block content %}{% endblock %}
+</main>
+
+<!-- ===== Footer ========================================================= -->
+<footer class="footer" aria-label="Site footer">
+  <div class="container">
+    <div class="footer__grid">
+      <div>
+        <p class="footer__brand">🍋 Little Lemon</p>
+        <p class="footer__tagline">Authentic Mediterranean flavours crafted with love and fresh, local ingredients.</p>
+      </div>
+      <div>
+        <p class="footer__heading">Quick Links</p>
+        <ul class="footer__links">
+          <li><a href="{% url 'home' %}">Home</a></li>
+          <li><a href="{% url 'menu' %}">Menu</a></li>
+          <li><a href="{% url 'reservation' %}">Reservations</a></li>
+          <li><a href="{% url 'order_status' %}">Order Status</a></li>
+        </ul>
+      </div>
+      <div>
+        <p class="footer__heading">Visit Us</p>
+        <ul class="footer__links">
+          <li><a href="{% url 'about' %}">About Us</a></li>
+          <li><a href="{% url 'contact' %}">Contact</a></li>
+          <li><a href="{% url 'admin_login' %}">Staff Login</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer__bottom">
+      <p class="footer__copy">&copy; 2025 Little Lemon Restaurant. All rights reserved.</p>
+      <p class="footer__copy">Islamabad, Pakistan &bull; contact@littlelemon.com</p>
+    </div>
+  </div>
+</footer>
+<!-- /Footer =============================================================== -->
+
+<script>
+  // Hamburger toggle
+  const toggle = document.getElementById('nav-toggle');
+  const navLinks = document.getElementById('nav-links');
+  if (toggle && navLinks) {
+    toggle.addEventListener('click', () => {
+      const open = navLinks.classList.toggle('open');
+      toggle.setAttribute('aria-expanded', open);
+    });
+  }
+</script>
+
+{% block extra_scripts %}{% endblock %}
+</body>
+</html>

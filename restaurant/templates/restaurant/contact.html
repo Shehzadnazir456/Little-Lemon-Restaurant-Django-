@@ -1,0 +1,100 @@
+{% extends 'restaurant/base.html' %}
+{% load static %}
+
+{% block title %}Contact{% endblock %}
+{% block meta_description %}Contact Little Lemon Restaurant — address, phone, email and opening hours.{% endblock %}
+
+{% block content %}
+
+<div class="page-hero">
+  <div class="container">
+    <h1>Get in Touch</h1>
+    <p>We'd love to hear from you.</p>
+  </div>
+</div>
+
+<section class="section section--dark" aria-labelledby="contact-heading">
+  <div class="container">
+    <h2 class="sr-only" id="contact-heading">Contact information and hours</h2>
+    <div class="contact-grid">
+
+      <!-- Contact info -->
+      <div class="contact-info">
+        <h3>Find Us</h3>
+
+        <div class="contact-info-item">
+          <span class="contact-info-item__icon" aria-hidden="true">📍</span>
+          <div class="contact-info-item__text">
+            <strong>Address</strong>
+            F-7 Markaz, Islamabad, Pakistan
+          </div>
+        </div>
+
+        <div class="contact-info-item">
+          <span class="contact-info-item__icon" aria-hidden="true">📞</span>
+          <div class="contact-info-item__text">
+            <strong>Phone</strong>
+            <a href="tel:+924567890" style="color:rgba(255,255,255,.8);">+92 51 456 7890</a>
+          </div>
+        </div>
+
+        <div class="contact-info-item">
+          <span class="contact-info-item__icon" aria-hidden="true">✉️</span>
+          <div class="contact-info-item__text">
+            <strong>Email</strong>
+            <a href="mailto:contact@littlelemon.com" style="color:rgba(255,255,255,.8);">contact@littlelemon.com</a>
+          </div>
+        </div>
+
+        {% if is_open %}
+          <span class="status-pill status-pill--open" role="status" style="margin-top:1rem;">
+            <span class="status-pill__dot" aria-hidden="true"></span>
+            Open Now
+          </span>
+        {% else %}
+          <span class="status-pill status-pill--closed" role="status" style="margin-top:1rem;">
+            <span class="status-pill__dot" aria-hidden="true"></span>
+            Currently Closed
+          </span>
+        {% endif %}
+      </div>
+
+      <!-- Hours -->
+      <div>
+        <h3 style="color:var(--color-primary); font-size:1.3rem; margin-bottom:1.5rem;">Opening Hours</h3>
+        {% if business_hours %}
+          <table class="hours-table" aria-label="Opening hours">
+            <tbody>
+              {% for bh in business_hours %}
+              <tr>
+                <td>{{ bh.get_day_of_week_display }}</td>
+                <td>
+                  {% if bh.is_closed %}
+                    <em style="color:rgba(255,255,255,.5);">Closed</em>
+                  {% else %}
+                    {{ bh.open_time|time:"g:i A" }} – {{ bh.close_time|time:"g:i A" }}
+                  {% endif %}
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        {% else %}
+          <p style="color:rgba(255,255,255,.7);">See our social pages for current hours.</p>
+        {% endif %}
+
+        <div style="margin-top: 2rem;">
+          <img
+            src="{% static 'images/contact.jpg' %}"
+            alt="Little Lemon restaurant exterior"
+            style="border-radius: var(--radius-lg); width:100%; max-height:260px; object-fit:cover;"
+            loading="lazy"
+          >
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+{% endblock %}

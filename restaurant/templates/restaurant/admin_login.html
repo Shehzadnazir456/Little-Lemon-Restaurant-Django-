@@ -1,0 +1,64 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Staff Login | Little Lemon</title>
+  <link rel="stylesheet" href="{% static 'css/style.css' %}">
+</head>
+<body>
+
+<main class="login-wrap" id="main-content">
+  <div class="login-card">
+    <div class="login-card__logo" aria-hidden="true">
+      <span class="login-card__logo-icon">🍋</span>
+    </div>
+    <h1 class="login-card__title">Staff Login</h1>
+    <p class="login-card__sub">Little Lemon Restaurant — Dashboard Access</p>
+
+    {% if error %}
+      <div class="login-error" role="alert">{{ error }}</div>
+    {% endif %}
+
+    <form method="post" novalidate>
+      {% csrf_token %}
+
+      <div class="form-group">
+        <label class="form-label" for="id_username">Username</label>
+        <input
+          type="text"
+          id="id_username"
+          name="username"
+          class="form-input"
+          autocomplete="username"
+          required
+          autofocus
+        >
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="id_password">Password</label>
+        <input
+          type="password"
+          id="id_password"
+          name="password"
+          class="form-input"
+          autocomplete="current-password"
+          required
+        >
+      </div>
+
+      <button type="submit" class="btn btn--secondary btn--full" style="margin-top:.5rem; font-size:1rem;">
+        Sign In
+      </button>
+    </form>
+
+    <p style="text-align:center; margin-top:1.5rem; font-size:.82rem; color:var(--color-text-muted);">
+      <a href="{% url 'home' %}" style="color:var(--color-secondary);">← Back to website</a>
+    </p>
+  </div>
+</main>
+
+</body>
+</html>

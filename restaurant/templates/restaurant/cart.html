@@ -1,0 +1,102 @@
+{% extends 'restaurant/base.html' %}
+{% load static %}
+
+{% block title %}Your Cart{% endblock %}
+
+{% block content %}
+<div class="page-hero">
+  <div class="container">
+    <h1>Your Cart</h1>
+    <p>Review your items before placing an order.</p>
+  </div>
+</div>
+
+<section class="section section--cream">
+  <div class="container">
+
+    {% if cart_items %}
+      <div style="display:grid; grid-template-columns:1fr 320px; gap:2rem; align-items:start;">
+
+        <!-- Items table -->
+        <div>
+          <div class="data-table-wrap">
+            <table class="cart-table" aria-label="Cart items">
+              <thead>
+                <tr>
+                  <th scope="col">Item</th>
+                  <th scope="col">Unit Price</th>
+                  <th scope="col">Qty</th>
+                  <th scope="col">Subtotal</th>
+                  <th scope="col"><span class="sr-only">Actions</span></th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for entry in cart_items %}
+                <tr>
+                  <td>
+                    <strong>{{ entry.menu_item.name }}</strong>
+                    {% if entry.menu_item.category %}
+                      <br><small style="color:var(--color-text-muted);">{{ entry.menu_item.category.name }}</small>
+                    {% endif %}
+                  </td>
+                  <td>${{ entry.menu_item.price }}</td>
+                  <td>
+                    <form method="post" action="{% url 'cart_update' entry.menu_item.pk %}" style="display:flex;gap:.5rem;align-items:center;">
+                      {% csrf_token %}
+                      <input
+                        type="number" name="quantity" value="{{ entry.quantity }}"
+                        min="0" max="99"
+                        class="form-input cart-qty-input"
+                        aria-label="Quantity for {{ entry.menu_item.name }}"
+                        onchange="this.form.submit()"
+                      >
+                    </form>
+                  </td>
+                  <td>${{ entry.line_total }}</td>
+                  <td>
+                    <form method="post" action="{% url 'cart_remove' entry.menu_item.pk %}">
+                      {% csrf_token %}
+                      <button type="submit" class="btn btn--danger btn--sm" aria-label="Remove {{ entry.menu_item.name }} from cart">✕</button>
+                    </form>
+                  </td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+          <a href="{% url 'menu' %}" class="btn btn--outline" style="margin-top:1rem;">← Continue Shopping</a>
+        </div>
+
+        <!-- Summary -->
+        <aside class="cart-summary" aria-label="Order summary">
+          <h2 style="font-size:1.1rem; margin-bottom:1.5rem; color:var(--color-secondary);">Order Summary</h2>
+          <div class="cart-summary-row">
+            <span>Subtotal</span>
+            <span>${{ subtotal }}</span>
+          </div>
+          <div class="cart-summary-row">
+            <span>Delivery</span>
+            <span style="color:var(--color-text-muted);">Calculated at checkout</span>
+          </div>
+          <div class="cart-summary-row cart-summary-row--total">
+            <span>Total</span>
+            <span>${{ subtotal }}</span>
+          </div>
+          <a href="{% url 'checkout' %}" class="btn btn--primary btn--full" style="margin-top:1.5rem;">
+            Proceed to Checkout
+          </a>
+        </aside>
+
+      </div>
+
+    {% else %}
+      <div style="text-align:center; padding: 4rem 0;">
+        <p style="font-size:3rem;" aria-hidden="true">🛒</p>
+        <p style="font-size:1.2rem; margin-bottom:1.5rem;">Your cart is empty.</p>
+        <a href="{% url 'menu' %}" class="btn btn--primary">Browse the Menu</a>
+      </div>
+    {% endif %}
+
+  </div>
+</section>
+{% endblock %}

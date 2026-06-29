@@ -1,0 +1,122 @@
+{% extends 'restaurant/base.html' %}
+{% load static %}
+
+{% block title %}Checkout{% endblock %}
+
+{% block content %}
+<div class="page-hero">
+  <div class="container">
+    <h1>Checkout</h1>
+    <p>Just a few details and your order is on its way.</p>
+  </div>
+</div>
+
+<section class="section section--cream">
+  <div class="container">
+    <div style="display:grid; grid-template-columns:1fr 360px; gap:2rem; align-items:start;">
+
+      <!-- Order form -->
+      <div class="form-card">
+        <h2 style="font-size:1.2rem; color:var(--color-secondary); margin-bottom:1.5rem;">Your Details</h2>
+        <form method="post" id="checkout-form" novalidate>
+          {% csrf_token %}
+
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:1rem;">
+            <div class="form-group">
+              <label class="form-label" for="{{ form.customer_name.id_for_label }}">
+                Name <span class="required" aria-hidden="true">*</span>
+              </label>
+              {{ form.customer_name }}
+              {% if form.customer_name.errors %}<ul class="errorlist">{% for e in form.customer_name.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="{{ form.email.id_for_label }}">
+                Email <span class="required" aria-hidden="true">*</span>
+              </label>
+              {{ form.email }}
+              {% if form.email.errors %}<ul class="errorlist">{% for e in form.email.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="{{ form.phone.id_for_label }}">Phone (optional)</label>
+            {{ form.phone }}
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Order Type <span class="required" aria-hidden="true">*</span></label>
+            <div class="radio-group" id="order-type-group">
+              {% for radio in form.order_type %}
+                <label>{{ radio.tag }} {{ radio.choice_label }}</label>
+              {% endfor %}
+            </div>
+            {% if form.order_type.errors %}<ul class="errorlist">{% for e in form.order_type.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
+          </div>
+
+          <!-- Conditional fields — shown/hidden via JS -->
+          <div id="field-party-size" class="form-group" style="display:none;">
+            <label class="form-label" for="{{ form.party_size.id_for_label }}">
+              Party Size <span class="required" aria-hidden="true">*</span>
+            </label>
+            {{ form.party_size }}
+            {% if form.party_size.errors %}<ul class="errorlist">{% for e in form.party_size.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
+          </div>
+
+          <div id="field-address" class="form-group" style="display:none;">
+            <label class="form-label" for="{{ form.delivery_address.id_for_label }}">
+              Delivery Address <span class="required" aria-hidden="true">*</span>
+            </label>
+            {{ form.delivery_address }}
+            {% if form.delivery_address.errors %}<ul class="errorlist">{% for e in form.delivery_address.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="{{ form.notes.id_for_label }}">Notes (optional)</label>
+            {{ form.notes }}
+          </div>
+
+          <button type="submit" class="btn btn--primary btn--full" style="font-size:1rem;">
+            Place Order
+          </button>
+        </form>
+      </div>
+
+      <!-- Order summary sidebar -->
+      <aside class="cart-summary" aria-label="Order summary">
+        <h2 style="font-size:1.1rem; margin-bottom:1.5rem; color:var(--color-secondary);">Your Order</h2>
+        {% for entry in cart_items %}
+        <div class="cart-summary-row">
+          <span>{{ entry.quantity }}× {{ entry.menu_item.name }}</span>
+          <span>${{ entry.line_total }}</span>
+        </div>
+        {% endfor %}
+        <div class="cart-summary-row cart-summary-row--total">
+          <span>Total</span>
+          <span>${{ subtotal }}</span>
+        </div>
+        <a href="{% url 'cart_view' %}" style="font-size:0.82rem; color:var(--color-text-muted); display:block; margin-top:.75rem;">← Edit cart</a>
+      </aside>
+
+    </div>
+  </div>
+</section>
+
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+  // Show/hide conditional fields based on order type
+  function updateFields() {
+    const radios = document.querySelectorAll('input[name="order_type"]');
+    let selected = '';
+    radios.forEach(r => { if (r.checked) selected = r.value; });
+    document.getElementById('field-party-size').style.display = (selected === 'dine_in')  ? 'block' : 'none';
+    document.getElementById('field-address').style.display    = (selected === 'takeaway') ? 'block' : 'none';
+  }
+  document.querySelectorAll('input[name="order_type"]').forEach(r => r.addEventListener('change', updateFields));
+  // Run on page load to restore server-side selected value
+  updateFields();
+  // Also run after DOMContentLoaded in case form re-renders with errors
+  document.addEventListener('DOMContentLoaded', updateFields);
+</script>
+{% endblock %}
